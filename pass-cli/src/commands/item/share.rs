@@ -1,12 +1,18 @@
 use crate::commands::Role;
-use anyhow::Result;
+use anyhow::{Context, Result};
 use pass::PassClient;
+use pass_domain::{ItemId, ShareId, ShareRole};
 
-pub async fn run(_client: PassClient, vault_id: String, item_id: String, role: Role) -> Result<()> {
-    println!("TODO: Implement item share command");
-    println!("Vault ID: {vault_id}, Item ID: {item_id}, Role: {role:?}");
-    // TODO: Implement item sharing
-    // client.share_item(&vault_id, &item_id, role).await?;
-    // println!("Item {} shared with role {:?}", item_id, role);
+pub async fn run(
+    client: PassClient,
+    share_id: ShareId,
+    item_id: ItemId,
+    address: &str,
+    role: Role,
+) -> Result<()> {
+    client
+        .share_item(&share_id, &item_id, address, &ShareRole::from(role))
+        .await
+        .context("Error sharing item")?;
     Ok(())
 }

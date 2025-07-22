@@ -2,6 +2,15 @@ use crate::{PassClient, PublicKey};
 use anyhow::{Context, Result};
 use muon::GET;
 
+const UNPROCESSABLE_ENTITY_CODE: u16 = 422;
+const ADDRESS_NOT_EXISTS_CODE: u32 = 33102;
+
+#[derive(Debug, serde::Deserialize)]
+struct CodeResponse {
+    #[serde(rename = "Code")]
+    code: u32,
+}
+
 #[derive(Debug, serde::Deserialize)]
 struct ActivePublicKeysResponse {
     #[serde(rename = "Address")]
@@ -53,18 +62,28 @@ impl PassClient {
             .send(req)
             .await
             .context("Error sending get keys request")?;
-        let response: ActivePublicKeysResponse = assert_response!(res);
 
-        let mut result = vec![];
-        let pgp = self.client_features.get_pgp_crypto().await;
-        for response in response.address.keys {
-            let unarmored = pgp
-                .unarmor(response.public_key)
-                .await
-                .context("Error unarmoring public key")?;
-            result.push(PublicKey { content: unarmored });
+        if res.status().as_u16() == UNPROCESSABLE_ENTITY_CODE {
+            let body: CodeResponse = res.body_json().context("Error parsing response")?;
+            if body.code == ADDRESS_NOT_EXISTS_CODE {
+                return Ok(vec![]);
+            }
+
+            Err(anyhow::anyhow!("Error fetching keys for address"))
+        } else {
+            let response: ActivePublicKeysResponse = assert_response!(res);
+
+            let mut result = vec![];
+            let pgp = self.client_features.get_pgp_crypto().await;
+            for response in response.address.keys {
+                let unarmored = pgp
+                    .unarmor(response.public_key)
+                    .await
+                    .context("Error unarmoring public key")?;
+                result.push(PublicKey { content: unarmored });
+            }
+
+            Ok(result)
         }
-
-        Ok(result)
     }
 }

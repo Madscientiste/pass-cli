@@ -24,6 +24,17 @@ impl PassClient {
             .await
             .context("Error creating invite to vault request")?;
 
+        self.send_invite(share_id, request)
+            .await
+            .context("Error sending invite request")?;
+        Ok(())
+    }
+
+    pub(crate) async fn send_invite(
+        &self,
+        share_id: &ShareId,
+        request: InviteRequest,
+    ) -> Result<()> {
         match request {
             InviteRequest::ExistingUser(req) => self
                 .send_existing_user_invites(share_id, req)
@@ -33,7 +44,7 @@ impl PassClient {
                 .send_new_user_invites(share_id, req)
                 .await
                 .context("Error sending new user invite")?,
-        };
+        }
 
         Ok(())
     }

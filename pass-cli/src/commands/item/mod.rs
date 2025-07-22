@@ -34,10 +34,12 @@ pub enum ItemCommands {
     },
     #[command(about = "Share an item")]
     Share {
-        #[arg(long, help = "ID of the vault containing the item")]
-        vault: String,
+        #[arg(long, help = "Share ID that contains the item")]
+        share_id: String,
         #[arg(long, help = "ID of the item to share")]
-        item: String,
+        item_id: String,
+        #[arg(help = "Email address to share with")]
+        email: String,
         #[arg(long, default_value = "viewer")]
         role: Role,
     },
@@ -68,7 +70,21 @@ pub async fn run(subcommand: ItemCommands, client: PassClient) -> Result<()> {
         ItemCommands::Delete { share_id, item_id } => {
             delete::run(client, ShareId::new(share_id), ItemId::new(item_id)).await
         }
-        ItemCommands::Share { vault, item, role } => share::run(client, vault, item, role).await,
+        ItemCommands::Share {
+            share_id,
+            item_id,
+            email,
+            role,
+        } => {
+            share::run(
+                client,
+                ShareId::new(share_id),
+                ItemId::new(item_id),
+                &email,
+                role,
+            )
+            .await
+        }
         ItemCommands::View {
             share_id,
             item_id,

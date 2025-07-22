@@ -1,6 +1,6 @@
+use crate::commands::OutputFormat;
 use anyhow::{Context, Result};
 use serde::Serialize;
-use crate::commands::OutputFormat;
 
 #[derive(Serialize)]
 pub struct PasswordScoreOutput {
@@ -23,7 +23,7 @@ pub fn score(password: &str, output_format: &OutputFormat) -> Result<()> {
             }
         }
         OutputFormat::Json => {
-            let score_out = PasswordScoreOutput{
+            let score_out = PasswordScoreOutput {
                 numeric_score: score.numeric_score,
                 password_score: score.password_score.to_string(),
                 penalties: score.penalties.iter().map(|p| p.to_string()).collect(),

@@ -2,6 +2,7 @@ use anyhow::{Context, anyhow};
 use pass::{PrivateKey, PublicKey};
 use proton_crypto::crypto::{
     ArmorerSync, DataEncoding, Decryptor, DecryptorSync, Encryptor, EncryptorSync, PGPProviderSync,
+    Signer, SignerSync,
 };
 
 pub struct NativePgpCrypto;
@@ -31,12 +32,10 @@ impl pass::PgpCrypto for NativePgpCrypto {
             .private_key_import_unlocked(&signing_key.content, DataEncoding::Bytes)
             .context("Could not import key")?;
         let res = provider
-            .new_encryptor()
+            .new_signer()
             .with_signing_key(&private_key)
-            .encrypt(data)
-            .context("Could not sign data")?
-            .as_ref()
-            .to_vec();
+            .sign_detached(data, DataEncoding::Bytes)
+            .context("Could not sign data")?;
 
         Ok(res)
     }

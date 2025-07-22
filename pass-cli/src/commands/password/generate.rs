@@ -1,8 +1,8 @@
+use crate::commands::OutputFormat;
 use anyhow::{Context, Result};
 use clap::{Subcommand, ValueEnum};
-use serde::Serialize;
 use pass::password::{PassphraseConfig, PasswordGenerationArgs, RandomPasswordConfig};
-use crate::commands::OutputFormat;
+use serde::Serialize;
 
 #[derive(Clone, ValueEnum)]
 pub enum WordSeparator {
@@ -31,7 +31,7 @@ impl From<&WordSeparator> for pass::password::WordSeparator {
 
 #[derive(Serialize)]
 struct PasswordOutput<'a> {
-    password: &'a str
+    password: &'a str,
 }
 
 #[derive(Subcommand)]
@@ -104,24 +104,30 @@ pub async fn run(command: &GeneratePasswordCommand) -> Result<()> {
             uppercase_letters,
             symbols,
             output,
-        } => (PasswordGenerationArgs::Random(RandomPasswordConfig {
-            length: *length,
-            numbers: numbers.unwrap_or(true),
-            uppercase_letters: uppercase_letters.unwrap_or(true),
-            symbols: symbols.unwrap_or(true),
-        }), output),
+        } => (
+            PasswordGenerationArgs::Random(RandomPasswordConfig {
+                length: *length,
+                numbers: numbers.unwrap_or(true),
+                uppercase_letters: uppercase_letters.unwrap_or(true),
+                symbols: symbols.unwrap_or(true),
+            }),
+            output,
+        ),
         GeneratePasswordCommand::Passphrase {
             separator,
             capitalise,
             include_numbers,
             count,
             output,
-        } => (PasswordGenerationArgs::Passphrase(PassphraseConfig {
-            separator: separator.into(),
-            capitalise: capitalise.unwrap_or(true),
-            include_numbers: include_numbers.unwrap_or(true),
-            count: *count,
-        }), output),
+        } => (
+            PasswordGenerationArgs::Passphrase(PassphraseConfig {
+                separator: separator.into(),
+                capitalise: capitalise.unwrap_or(true),
+                include_numbers: include_numbers.unwrap_or(true),
+                count: *count,
+            }),
+            output,
+        ),
     };
 
     let password = pass::password::generate(args).context("Failed to generate password")?;
@@ -131,8 +137,10 @@ pub async fn run(command: &GeneratePasswordCommand) -> Result<()> {
             println!("{password}");
         }
         OutputFormat::Json => {
-            let as_json =
-                serde_json::to_string_pretty(&PasswordOutput { password: &password }).context("Error serializing password")?;
+            let as_json = serde_json::to_string_pretty(&PasswordOutput {
+                password: &password,
+            })
+            .context("Error serializing password")?;
             println!("{as_json}");
         }
     }

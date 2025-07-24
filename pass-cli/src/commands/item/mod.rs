@@ -4,6 +4,7 @@ use clap::Subcommand;
 use pass::PassClient;
 use pass_domain::{ItemId, ShareId};
 
+pub mod alias;
 pub mod attachment;
 pub mod create;
 pub mod delete;
@@ -59,6 +60,11 @@ pub enum ItemCommands {
         #[command(subcommand)]
         attachment_command: attachment::AttachmentCommands,
     },
+    #[command(about = "Alias operations")]
+    Alias {
+        #[command(subcommand)]
+        alias_command: alias::AliasCommands,
+    },
 }
 
 pub async fn run(subcommand: ItemCommands, client: PassClient) -> Result<()> {
@@ -103,5 +109,6 @@ pub async fn run(subcommand: ItemCommands, client: PassClient) -> Result<()> {
         ItemCommands::Attachment { attachment_command } => {
             attachment::run(attachment_command, client).await
         }
+        ItemCommands::Alias { alias_command } => alias::run(alias_command, client).await,
     }
 }

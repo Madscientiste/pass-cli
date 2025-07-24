@@ -93,6 +93,10 @@ impl ItemData {
 
         Ok(Self::from(as_proto))
     }
+
+    pub fn generate_uuid() -> String {
+        uuid::Uuid::new_v4().to_string()
+    }
 }
 
 impl From<ItemData> for item_v1::Item {

@@ -1,3 +1,4 @@
+mod alias;
 mod delete;
 mod download_attachment;
 mod get_one;

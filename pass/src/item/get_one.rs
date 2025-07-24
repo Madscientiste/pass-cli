@@ -50,14 +50,6 @@ struct AttachmentResponse {
     pub chunks: Vec<ChunkResponse>,
     #[serde(rename = "EncryptionVersion")]
     pub encryption_version: u8,
-    /*
-    #[serde(rename = "RevisionAdded")]
-    pub revision_added: i64,
-    #[serde(rename = "RevisionRemoved")]
-    pub revision_removed: Option<i64>,
-    #[serde(rename = "PersistentFileUID")]
-    pub persistent_file_uid: String,
-    */
 }
 
 #[derive(Debug, serde::Deserialize)]
